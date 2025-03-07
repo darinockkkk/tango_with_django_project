@@ -9,7 +9,7 @@
     <body>
         <div>
         {% if category %}
-            <h1> {{ category.name }} </h1>
+            <h1>{{ category.name }}</h1>
             {% if pages %}
             <ul>
                 <!-- creates a list of pages inside the category -->
@@ -27,7 +27,8 @@
         </div>
 
         <div>
-            <a href="{% url 'index' %}">Back to Home</a>
+            <a href="/rango/">Index</a><br />
+            <a href="/rango/about/">About</a><br />
         </div>
     </body>
 
