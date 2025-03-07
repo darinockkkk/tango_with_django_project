@@ -11,12 +11,17 @@ def index(request):
     # Retrieve the top 5 only
     category_list = Category.objects.order_by('-likes')[:5]
 
+    # Query the database for the top 5 most viewed pages.
+    page_list = Page.objects.order_by('-views')[:5]
+
     context_dict = {}
 
     # Place the list in our context_dict dictionary (with our boldmessage!)
     # that will be passed to the template engine.
     context_dict['boldmessage'] = 'Crunchy, creamy, cookie, candy, cupcake!'
     context_dict['categories'] = category_list
+    context_dict['pages'] = page_list  # Pass most viewed pages to the template
+
 
     # Return a rendered response to send to the client.
     # the first parameter is the template we wish to use.
