@@ -5,7 +5,10 @@ from rango.models import Category
 from rango.models import Page
 
 from rango.forms import CategoryForm
+from rango.forms import PageForm
+
 from django.shortcuts import redirect
+from django.urls import reverse
 
 
 # what to show when someone visits a URL.
@@ -80,6 +83,41 @@ def add_category(request):
         print(form.errors)
     return render(request, 'rango/add_category.html', {'form': form})
 
+def add_page(request, category_name_slug):
+    
+    # you cant add a page to Category that doesnt exist
+    try:
+        category = Category.objects.get(slug=category_name_slug)
+    except Category.DoesNotExist:
+        category = None
+    
+    if category is None:
+        # redirect the user back to the index page
+        return redirect('/rango/')
 
+    form = PageForm()
 
+    if request.method == "POST":
+        form = PageForm(request.POST)
+
+        if form.is_valid():
+            if category:
+                page = form.save(commit=False) # create a Page object but don't save it yet
+                page.category = category # assign the page to the correct category
+                page.views = 0
+                page.save() # save the page to the database
+
+                # redirect user to category page after adding a new page
+
+                # reverse() generates URL for show_category view
+                # 'rango:show_category' refers to the URL name in urls.py
+                return redirect(reverse('rango:show_category',
+                                        kwargs={'category_name_slug': category_name_slug})) # fill in URL parameter (category_name_slug)
+        
+        else:
+            print(form.errors)
+
+    # when form is not submitted or invalid
+    context_dict = {'form': form, 'category': category}
+    return render(request, 'rango/add_page.html', context=context_dict)
 
