@@ -6,7 +6,7 @@ class PageAdmin(admin.ModelAdmin):
     list_display = ('title', 'category', 'url') 
 
 class CategoryAdmin(admin.ModelAdmin):
-    list_display = ('name',) 
+    prepopulated_fields = {'slug':('name',)}
 
 # Register models with custom admin views
 admin.site.register(Category, CategoryAdmin)
