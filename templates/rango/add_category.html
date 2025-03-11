@@ -1,37 +1,36 @@
-<!DOCTYPE html>
-<html>
-    <head>
-        <title>Rango</title>
-    </head>
+{% extends 'rango/base.html' %}
+{% load staticfiles %}
 
-    <body>
-        <h1>Add a Category</h1>
-        <div>
+{% block title_block %}
+    Add a Category
+{% endblock %}
 
-            <!-- id="category_form" sets an ID for SCC/JavaScript -->
-            <!-- action="/rango/add_category/" sends form data to /rango/add_category/ when submitted -->
-            <form id="category_form" method="post" action="/rango/add_category/">
+{% block body_block %}
+    <h1>Add a Category</h1>
+    <div>
+        <!-- id="category_form" sets an ID for SCC/JavaScript -->
+        <!-- action="/rango/add_category/" sends form data to /rango/add_category/ when submitted -->
+        <form id="category_form" method="post" action="{%url 'rango:add_category' %}">
 
-                <!-- security token required for POST requests -->
-                {% csrf_token%}
+            <!-- security token required for POST requests -->
+            {% csrf_token%}
 
-                <!-- loops through hidden fields in the form and displays them -->
-                {% for hidden in form.hidden_fields %}
-                    {{ hidden }}
-                {% endfor %}
+            <!-- loops through hidden fields in the form and displays them -->
+            {% for hidden in form.hidden_fields %}
+                {{ hidden }}
+            {% endfor %}
 
-                <!-- loops through all visible fields, shows errors if needed, 
-                displays extra info like “Enter category name”, displays the input field itself-->
-                {% for field in form.visible_fields %}
-                    {{ field.errors }}
-                    {{ field.help_text }}
-                    {{field}}
-                {% endfor %}
+            <!-- loops through all visible fields, shows errors if needed, 
+            displays extra info like “Enter category name”, displays the input field itself-->
+            {% for field in form.visible_fields %}
+                {{ field.errors }}
+                {{ field.help_text }}
+                {{field}}
+            {% endfor %}
 
-                <!-- submit button, type means it sends form data when clicked,
-                value is a button text -->
-                <input type="submit" name="submit" value="Create Category" />
-            </form>
-        </div>
-    </body>
-</html>
+            <!-- submit button, type means it sends form data when clicked,
+            value is a button text -->
+            <input type="submit" name="submit" value="Create Category" />
+        </form>
+    </div>
+{% endblock %}
