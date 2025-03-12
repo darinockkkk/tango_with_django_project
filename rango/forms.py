@@ -1,5 +1,8 @@
 from django import forms
 from rango.models import Page, Category
+from django.contrib.auth.models import User
+from rango.models import UserProfile
+
 
 
 # make sure the form gonna contain and pass on all the data that is required to populate your model correctly
@@ -55,3 +58,20 @@ class PageForm(forms.ModelForm):
         
         # without this line, changes won’t be applied
         return cleaned_data
+    
+class UserForm(forms.ModelForm):
+    # specify that CharField instance should hide user’s input from prying eyes thru use of PasswordInput() widget
+    password = forms.CharField(widget=forms.PasswordInput())
+    
+    # class Meta links a form to a model + additional properties about particular class
+    # each Meta class must supply a model field
+    # specify fields (or fields to exclude) to indicate which fields associated with model 
+    # should be present (or not) on rendered form
+    class Meta:
+        model = User
+        # which fields we want to show
+        fields = ('username', 'email', 'password',)
+class UserProfileForm(forms.ModelForm):
+    class Meta:
+        model = UserProfile
+        fields = ('website', 'picture',)

@@ -42,7 +42,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'rango'
+    'rango',
 ]
 
 MIDDLEWARE = [
@@ -133,3 +133,5 @@ MEDIA_ROOT = MEDIA_DIR
 #what URL to serve them from
 MEDIA_URL = '/media/'
 
+# login_required() decorator will redirect any user not logged in to URL you specify
+LOGIN_URL = 'rango:login'

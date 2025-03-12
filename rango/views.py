@@ -6,10 +6,14 @@ from rango.models import Page
 
 from rango.forms import CategoryForm
 from rango.forms import PageForm
+from rango.forms import UserForm, UserProfileForm
 
 from django.shortcuts import redirect
 from django.urls import reverse
 
+from django.contrib.auth import authenticate, login, logout
+
+from django.contrib.auth.decorators import login_required
 
 # what to show when someone visits a URL.
 
@@ -68,6 +72,7 @@ def show_category(request, category_name_slug):
     # render the response and return it to the client.
     return render(request, 'rango/category.html', context=context_dict)
 
+@login_required
 # display the Category Form and handle the posting of form data
 def add_category(request):
     form = CategoryForm()
@@ -85,6 +90,7 @@ def add_category(request):
         print(form.errors)
     return render(request, 'rango/add_category.html', {'form': form})
 
+@login_required
 def add_page(request, category_name_slug):
     
     # you cant add a page to Category that doesnt exist
@@ -122,4 +128,89 @@ def add_page(request, category_name_slug):
     # when form is not submitted or invalid
     context_dict = {'form': form, 'category': category}
     return render(request, 'rango/add_page.html', context=context_dict)
+
+def register(request):
+    registered = False
+
+    if request.method == 'POST':
+        # initializes a form with user credentials + with additional user profile details
+        user_form = UserForm(request.POST)
+        profile_form = UserProfileForm(request.POST)
+
+        if user_form.is_valid() and profile_form.is_valid():
+            # save user's form data to database
+            user = user_form.save()
+
+            # hash password with set_password method
+            user.set_password(user.password)
+            # update user object
+            user.save()
+
+            # prevents saving immediately (needed cuz UserProfile must be linked to User first)
+            profile = profile_form.save(commit=False)
+            # links the UserProfile to the corresponding User
+            profile.user = user
+
+            if 'picture' in request.FILES:
+                # get picture from input form and put it in UserProfile model
+                profile.picture = request.FILES['picture']
+
+            profile.save()
+            registered = True
+
+        else:
+            # print problems to the terminal
+            print(user_form.errors, profile_form.errors)
+    else:
+        # if not POST, empty form is displayed
+        user_form = UserForm()
+        profile_form = UserProfileForm()
+    
+    return render(request,
+                    'rango/register.html',
+                    context = {'user_form': user_form, # keys must be strings because they are used as template variables
+                                'profile_form': profile_form,
+                                'registered': registered})
+
+def user_login(request):
+    if request.method == 'POST':
+        # gather username and password provided by user from login form
+        username = request.POST.get('username')
+        password = request.POST.get('password')
+
+        # check whether username/password match a valid user account - User object is returned if it is (or None)
+        user = authenticate(username=username, password=password)
+
+        if user:
+            # account could have been disabled
+            if user.is_active:
+                login(request, user)
+                return redirect(reverse('rango:index'))
+            else:
+                return HttpResponse("Your Rango account is disabled.")
+        else:
+            print(f"Invalid login details: {username}, {password}")
+            return HttpResponse("Invalid login details supplied.")
+    else:
+        # GET - User visits /login/	-- django displays login form
+        # POST - User fills form & clicks "Login" -- django processes form data and logs user in
+        return render (request, 'rango/login.html')
+
+
+# if user is NOT logged in, Django automatically redirects to LOGIN_URL
+@login_required
+def restricted(request):
+    return render(request, 'rango/restricted.html')
+
+# login_required() decorator to ensure only those logged in can access view
+@login_required
+def user_logout(request):
+    logout(request)
+    # back to the homepage.
+    return redirect(reverse('rango:index'))
+
+
+
+
+
 

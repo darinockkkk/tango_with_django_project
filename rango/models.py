@@ -1,5 +1,6 @@
 from django.db import models
 from django.template.defaultfilters import slugify
+from django.contrib.auth.models import User
 
 # here Django will create tables in the underlying database
 
@@ -31,6 +32,22 @@ class Page(models.Model):
     url = models.URLField()
     views = models.IntegerField(default=0)
 
-    # Django will display the string representation of the object, derived from __str__().
+    # django will display the string representation of the object, derived from __str__().
     def __str__(self):
         return self.title
+    
+class UserProfile(models.Model):
+    # required line, links UserProfile to a User model instance
+    # one-to-one relationship between custom user profile model and Django’s built-in User model
+    # if linked User is deleted, this profile will also be deleted
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    
+    # additional attributes we wish to include
+    website = models.URLField(blank=True)
+    picture = models.ImageField(upload_to='profile_images', blank=True) # all profile images stored in tango_with_django_project/media/profile_images/
+    
+    # return meaningful value when string representation of UserProfile model instance is requested
+    # without __str__, profile would return something like <UserProfile object (1)>, but this method makes it human-readable by showing username
+    def __str__(self):
+        return self.user.username
+

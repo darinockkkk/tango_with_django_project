@@ -1,5 +1,6 @@
 from django.contrib import admin
 from rango.models import Category, Page
+from rango.models import UserProfile
 
 #admin.ModelAdmins customizes how a model appears in the Django admin panel.
 class PageAdmin(admin.ModelAdmin):
@@ -11,3 +12,5 @@ class CategoryAdmin(admin.ModelAdmin):
 # Register models with custom admin views
 admin.site.register(Category, CategoryAdmin)
 admin.site.register(Page, PageAdmin)
+admin.site.register(UserProfile)
+
