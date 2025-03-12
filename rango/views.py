@@ -36,7 +36,9 @@ def index(request):
     return render(request, 'rango/index.html', context=context_dict)
 
 def about (request):
-    return render(request, 'rango/about.html')
+    print(request.method) #GET or POST
+    print(request.user) # user status
+    return render(request, 'rango/about.html', {}) # last parameter is context dictionary to pass additional data to template
 
 def show_category(request, category_name_slug):
     context_dict = {}
