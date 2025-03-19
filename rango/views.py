@@ -15,6 +15,8 @@ from django.contrib.auth import authenticate, login, logout
 
 from django.contrib.auth.decorators import login_required
 
+from datetime import datetime
+
 # what to show when someone visits a URL.
 
 def index(request):
@@ -33,15 +35,45 @@ def index(request):
     context_dict['boldmessage'] = 'Crunchy, creamy, cookie, candy, cupcake!'
     context_dict['categories'] = category_list
     context_dict['pages'] = page_list  # Pass most viewed pages to the template
+    context_dict['visits'] = int(request.COOKIES.get('visits', '1'))
+
+    # obtain our Response object early so we can add cookie information
+    response = render(request, 'rango/index.html', context=context_dict)
+
+    visitor_cookie_handler(request, response)
+
+    # return response back to user, updating any cookies that need changed
+    return response
 
 
-    # Return a rendered response to send to the client.
-    # the first parameter is the template we wish to use.
-    return render(request, 'rango/index.html', context=context_dict)
+# helper function
+# we access incoming cookies from request, and add/update cookies in response
+# all cookie values are returned as strings
+def visitor_cookie_handler(request, response):
+    # get number of visits to site - use COOKIES.get() to obtain visits cookie
+    # if cookie doesn't exist, value of 1 is used
+    visits = int(request.COOKIES.get('visits', '1'))
+
+    last_visit_cookie = request.COOKIES.get('last_visit', str(datetime.now()))
+    last_visit_time = datetime.strptime(last_visit_cookie[:-7],
+                                        '%Y-%m-%d %H:%M:%S')
+    
+    # if more than a day since last visit
+    if (datetime.now() - last_visit_time).days > 0:
+        visits = visits + 1
+        # update last visit cookie now that we have updated the count
+        response.set_cookie('last_visit', str(datetime.now())) # name of cookie you wish to create (str), and value of cookie
+    else:
+        # set last visit cookie cuz we can only increment site counter once per day
+        response.set_cookie('last_visit', last_visit_cookie)
+
+    # update visits cookie
+    response.set_cookie('visits', visits)
 
 def about (request):
     print(request.method) #GET or POST
     print(request.user) # user status
+
     return render(request, 'rango/about.html', {}) # last parameter is context dictionary to pass additional data to template
 
 def show_category(request, category_name_slug):
