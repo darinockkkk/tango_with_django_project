@@ -34,27 +34,31 @@ def index(request):
     # that will be passed to the template engine.
     context_dict['boldmessage'] = 'Crunchy, creamy, cookie, candy, cupcake!'
     context_dict['categories'] = category_list
-    context_dict['pages'] = page_list  # Pass most viewed pages to the template
-    context_dict['visits'] = int(request.COOKIES.get('visits', '1'))
+    context_dict['pages'] = page_list  # Pass most viewed pages to the templat
 
-    # obtain our Response object early so we can add cookie information
-    response = render(request, 'rango/index.html', context=context_dict)
-
-    visitor_cookie_handler(request, response)
+    visitor_cookie_handler(request)
 
     # return response back to user, updating any cookies that need changed
-    return response
-
+    return render(request, 'rango/index.html', context=context_dict)
 
 # helper function
-# we access incoming cookies from request, and add/update cookies in response
+# all cookies are stored server-side, so we can remove response from visitor_cookie_handler() definition
+# asks request for cookie. If it's is in session data, then its value is returned
+def get_server_side_cookie(request, cookie, default_val=None):
+    val = request.session.get(cookie)
+    if not val:
+        val = default_val
+    return val
+
+# helper function
+# we access incoming cookies from request
 # all cookie values are returned as strings
-def visitor_cookie_handler(request, response):
+def visitor_cookie_handler(request):
     # get number of visits to site - use COOKIES.get() to obtain visits cookie
     # if cookie doesn't exist, value of 1 is used
-    visits = int(request.COOKIES.get('visits', '1'))
+    visits = int(get_server_side_cookie(request, 'visits', '1'))
 
-    last_visit_cookie = request.COOKIES.get('last_visit', str(datetime.now()))
+    last_visit_cookie = get_server_side_cookie(request, 'last_visit', str(datetime.now()))
     last_visit_time = datetime.strptime(last_visit_cookie[:-7],
                                         '%Y-%m-%d %H:%M:%S')
     
@@ -62,19 +66,26 @@ def visitor_cookie_handler(request, response):
     if (datetime.now() - last_visit_time).days > 0:
         visits = visits + 1
         # update last visit cookie now that we have updated the count
-        response.set_cookie('last_visit', str(datetime.now())) # name of cookie you wish to create (str), and value of cookie
+        request.session['last_visit'] = str(datetime.now())
     else:
-        # set last visit cookie cuz we can only increment site counter once per day
-        response.set_cookie('last_visit', last_visit_cookie)
+        # set last visit cookie
+        request.session['last_visit'] = last_visit_cookie
 
-    # update visits cookie
-    response.set_cookie('visits', visits)
+    # update visits cookie ('<cookie_name>', value)
+    request.session['visits'] = visits
 
 def about (request):
     print(request.method) #GET or POST
     print(request.user) # user status
 
-    return render(request, 'rango/about.html', {}) # last parameter is context dictionary to pass additional data to template
+    context_dict = {}
+
+    visitor_cookie_handler(request)
+    context_dict['visits'] = request.session['visits']
+
+    response = render(request, 'rango/about.html', context=context_dict)
+    # return response back to user, updating any cookies that need changed
+    return response
 
 def show_category(request, category_name_slug):
     context_dict = {}
