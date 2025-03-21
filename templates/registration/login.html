@@ -1,0 +1,27 @@
+{% extends 'rango/base.html' %}
+
+{% block title_block %}
+    Login
+{% endblock %}
+
+{% block body_block %}
+<h1>Login</h1>
+
+<!--"." means that form will submit data to current URL (= same URL that rendered the form). 
+It implies that this form is submitting to the same view that generated it (typically a login view) -->
+<form method="post" action=".">
+
+    {% csrf_token %}
+
+    <!-- outputs form fields in <p> tag (paragraph) for each form field -->
+    {{ form.as_p }}
+    
+    <input type="submit" value="Log In" />
+    <input type="hidden" name="next" value="{{ next }}" />
+</form>
+
+<p>
+    Not registered?
+    <a href="{% url 'registration_register' %}">Register here!</a>
+</p>
+{% endblock %}

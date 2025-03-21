@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rango',
+    'registration',
 ]
 
 MIDDLEWARE = [
@@ -134,4 +135,15 @@ MEDIA_ROOT = MEDIA_DIR
 MEDIA_URL = '/media/'
 
 # login_required() decorator will redirect any user not logged in to URL you specify
-LOGIN_URL = 'rango:login'
+# LOGIN_URL = 'rango:login'
+
+
+# if True, users can register
+REGISTRATION_OPEN = True
+# if True, user will be automatically logged in after registering
+REGISTRATION_AUTO_LOGIN = True
+
+# URL that Django redirects users to after logging in
+LOGIN_REDIRECT_URL = 'rango:index'
+# the page users are directed to if they are not logged in
+LOGIN_URL = 'auth_login'

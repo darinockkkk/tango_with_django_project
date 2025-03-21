@@ -26,6 +26,7 @@ urlpatterns = [
     path('rango/', include('rango.urls')),
     # The above maps any URLs starting with rango/ to be handled by rango.
     path('admin/', admin.site.urls),
+    path('accounts/', include('registration.backends.simple.urls')),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT) #tells Django where to find user-uploaded files, 
 #settings.MEDIA_URL – The URL path where media files will be accessed (e.g., /media/).
 #settings.MEDIA_ROOT – The folder where Django will store uploaded
